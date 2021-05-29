@@ -86,7 +86,7 @@ void setup()
         { // If connection was successful, try to read content of the Web page and display it on screen
             String htmlText;
             htmlText = http.getString();
-            display.setTextSize(1); // Set smaller text size, so everything can fit on screen
+            // display.setTextSize(1); // Set smaller text size, so everything can fit on screen
             display.clearDisplay();
             display.setCursor(0, 0);
             display.print(htmlText);
