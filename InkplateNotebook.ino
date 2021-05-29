@@ -28,6 +28,8 @@
 
 Inkplate display(INKPLATE_1BIT); // Create an object on Inkplate library and also set library into 1 Bit mode (BW)
 
+char notebook_url[] = "https://github.com/dgarrett/InkplateNotebook/raw/master/notebook.txt";
+
 void setup()
 {
     display.begin();                                  // Init Inkplate library (you should call this function ONLY ONCE)
@@ -78,7 +80,7 @@ void setup()
     display.partialUpdate();
 
     HTTPClient http;
-    if (http.begin("http://example.com/index.html"))
+    if (http.begin(notebook_url))
     { // Now try to connect to some web page (in this example www.example.com. And yes, this is a valid Web page :))
         if (http.GET() > 0)
         { // If connection was successful, try to read content of the Web page and display it on screen
