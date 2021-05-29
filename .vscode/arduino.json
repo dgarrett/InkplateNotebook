@@ -1,0 +1,6 @@
+{
+    "configuration": "PSRAM=enabled,PartitionScheme=huge_app,CPUFreq=240,UploadSpeed=115200,DebugLevel=none",
+    "board": "Croduino_Boards:Inkplate:Inkplate6",
+    "port": "/dev/tty.usbserial-1450",
+    "sketch": "InkplateNotebook.ino"
+}
