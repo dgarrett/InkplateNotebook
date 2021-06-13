@@ -23,12 +23,24 @@
 #include "Inkplate.h"   //Include Inkplate library to the sketch
 #include <HTTPClient.h> //Include HTTP library to this sketch
 #include <WiFi.h>       //Include ESP32 WiFi library to our sketch
+#include <WiFiClientSecure.h>
+#include <vector>
 
 #include "secrets.h"
 
+#define TEST_NO_NETWORK 1
+
 Inkplate display(INKPLATE_1BIT); // Create an object on Inkplate library and also set library into 1 Bit mode (BW)
 
-char notebook_url[] = "https://github.com/dgarrett/InkplateNotebook/raw/master/notebook.txt";
+char index_url[] = "https://raw.githubusercontent.com/dgarrett/InkplateNotebook/master/notebook.txt";
+String test_index = "https://raw.githubusercontent.com/dgarrett/InkplateNotebook/master/notebook.txt";
+
+std::vector<String> page_urls;
+
+void process_page_urls(const String &index)
+{
+    page_urls.push_back("");
+}
 
 void setup()
 {
@@ -40,6 +52,11 @@ void setup()
     display.setTextColor(BLACK, WHITE);               // Set text color to black and background color to white
     display.println("Scanning for WiFi networks..."); // Write text
     display.display();                                // Send everything to display (refresh display)
+
+#if TEST_NO_NETWORK
+    process_page_urls(test_index);
+    return;
+#endif
 
     int n = WiFi.scanNetworks(); // Start searching WiFi networks and put the nubmer of found WiFi networks in variable
                                  // n
@@ -80,22 +97,28 @@ void setup()
     display.partialUpdate();
 
     HTTPClient http;
-    if (http.begin(notebook_url))
+    if (http.begin(index_url))
     { // Now try to connect to some web page (in this example www.example.com. And yes, this is a valid Web page :))
         if (http.GET() > 0)
         { // If connection was successful, try to read content of the Web page and display it on screen
-            String htmlText;
-            htmlText = http.getString();
-            // display.setTextSize(1); // Set smaller text size, so everything can fit on screen
+            String text;
+            text = http.getString();
             display.clearDisplay();
             display.setCursor(0, 0);
-            display.print(htmlText);
+            display.print(text);
             display.display();
+
+            process_page_urls(text);
         }
     }
 }
 
 void loop()
 {
-    // Nothing
+    display.print(" Touch: ");
+    display.print(display.readTouchpad(PAD1));
+    display.print(display.readTouchpad(PAD2));
+    display.print(display.readTouchpad(PAD3));
+    display.partialUpdate();
+    delay(1000);
 }
