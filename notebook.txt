@@ -1,2 +1,13 @@
-Hello world
-Here's a basic notebook
+First note
+This note has file lines
+here's another
+and another
+here's a longer line with more words and such
+and the last line
+---
+Second note
+This note only has two lines
+this is the last one
+---
+Third note
+One line here

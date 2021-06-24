@@ -9,9 +9,13 @@ from time import sleep
 
 from secrets import ssid, password
 
+SIMULATE_NET = True
+notes_url = "https://raw.githubusercontent.com/dgarrett/InkplateNotebook/master/notebook.txt"
+
 # More info here: https://docs.micropython.org/en/latest/esp8266/tutorial/network_basics.html
 def do_connect():
-    import network
+    if SIMULATE_NET:
+        return
 
     sta_if = network.WLAN(network.STA_IF)
     if not sta_if.isconnected():
@@ -24,26 +28,12 @@ def do_connect():
 
 
 # More info here: https://docs.micropython.org/en/latest/esp8266/tutorial/network_tcp.html
-def http_get(url):
-    res = urequests.get(url)
-    return res.text
-    import socket
-
-    res = ""
-    _, _, host, path = url.split("/", 3)
-    addr = socket.getaddrinfo(host, 80)[0][-1]
-    s = socket.socket()
-    s.connect(addr)
-    s.send(bytes("GET /%s HTTP/1.0\r\nHost: %s\r\n\r\n" % (path, host), "utf8"))
-    while True:
-        data = s.recv(100)
-        if data:
-            res += str(data, "utf8")
-        else:
-            break
-    s.close()
-
-    return res
+def http_get(url) -> str:
+    if SIMULATE_NET:
+        return 'Note one\ncontents of note one\nthree\nmore\nlines\n---\nNote two\nand some contents for note two\ntwo more\nlines\n---\nNote three'
+    else:
+        res = urequests.get(url)
+        return res.text
 
 def sleep_until_touch():
     # Try:
@@ -71,23 +61,65 @@ def sleep_until_touch():
     print('Going to sleep now')
     machine.deepsleep()
 
+def print_lines(display: Inkplate, text: str, size = 3):
+    display.clearDisplay()
+    display.setTextSize(size)
+    cnt = 0
+    for x in text.split("\n"):
+        if cnt == 0:
+            display.setTextSize(size * 2)
+        display.printText(
+            10, 10 + cnt, x.upper()
+        )
+        if cnt == 0:
+            display.setTextSize(size)
+            cnt += 10 * size * 2
+        else:
+            cnt += 10 * size
 
-print('wake reason: ', machine.wake_reason())
-# Calling functions defined above
-do_connect()
-response = http_get("http://micropython.org/ks/test.html")
+def split_notes(raw: str) -> list(str):
+    return str.split('\n---\n')
 
-# Initialise our Inkplate object
-display = Inkplate(Inkplate.INKPLATE_1BIT)
-display.begin()
+def handle_interrupt(pin):
+    print('interrupt')
 
-# Print response in lines
-cnt = 0
-for x in response.split("\n"):
-    display.printText(
-        10, 10 + cnt, x.upper()
-    )  # Default font has only upper case letters
-    cnt += 10
+if __name__ == '__main__':
+    print('wake reason: ', machine.wake_reason())
 
-# Display image from buffer
-display.display()
+    display = Inkplate(Inkplate.INKPLATE_1BIT)
+    display.begin()
+
+    # display.TOUCH1.irq(trigger=Pin.IRQ_RISING, handler=handle_interrupt)
+
+    # Calling functions defined above
+    do_connect()
+    response = http_get(notes_url)
+
+    notes = response.split('\n---\n')
+    current_note = 0
+    print_lines(display, notes[current_note])
+
+    # Display image from buffer
+    display.display()
+
+    prev1 = False
+    prev3 = False
+    (prev_touch1, prev_touch2, prev_touch3) = (False, False, False)
+    while True:
+        update = False
+        (curr_touch1, curr_touch2, curr_touch3) = (display.TOUCH1(), display.TOUCH2(), display.TOUCH3())
+        if curr_touch1 and not prev_touch1:
+            print('TOUCH1')
+            current_note = current_note - 1 if current_note > 0 else current_note
+            update = True
+        elif curr_touch3 and not prev_touch3:
+            print('TOUCH3')
+            current_note = current_note + 1 if current_note < len(notes) - 1 else current_note
+            update = True
+
+        if update:
+            print_lines(display, notes[current_note])
+            display.partialUpdate()
+
+        (prev_touch1, prev_touch2, prev_touch3) = (curr_touch1, curr_touch2, curr_touch3)
+
