@@ -9,6 +9,14 @@ from time import sleep
 
 from secrets import ssid, password
 
+"""
+setup:
+./micropython/pyboard.py --device /dev/cu.usbserial-1450 -f cp ./micropython/sdcard.py ./micropython/inkplate6.py ./micropython/image.py ./micropython/gfx.py ./micropython/gfx_standard_font_01.py ./micropython/shapes.py ./micropython-lib/python-stdlib/textwrap/textwrap.py secrets.py :
+
+run:
+./micropython/pyboard.py --device /dev/cu.usbserial-1450 InkplateNotebook.py --follow
+"""
+
 SIMULATE_NET = False
 notes_url = "https://raw.githubusercontent.com/dgarrett/InkplateNotebook/master/notebook.txt"
 
@@ -65,7 +73,8 @@ def print_lines(display: Inkplate, text: str, size = 3):
     display.clearDisplay()
     display.setTextSize(size)
     cnt = 0
-    for x in text.split("\n"):
+    split = text.split('\n')
+    for x in split:
         if cnt == 0:
             display.setTextSize(size * 2)
         display.printText(
