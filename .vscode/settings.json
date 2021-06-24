@@ -25,5 +25,8 @@
         "*.tcc": "cpp",
         "algorithm": "cpp",
         "numeric": "cpp"
-    }
+    },
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/micropython"
+    ]
 }

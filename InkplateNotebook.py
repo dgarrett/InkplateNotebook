@@ -9,7 +9,7 @@ from time import sleep
 
 from secrets import ssid, password
 
-SIMULATE_NET = True
+SIMULATE_NET = False
 notes_url = "https://raw.githubusercontent.com/dgarrett/InkplateNotebook/master/notebook.txt"
 
 # More info here: https://docs.micropython.org/en/latest/esp8266/tutorial/network_basics.html
