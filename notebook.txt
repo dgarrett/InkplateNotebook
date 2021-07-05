@@ -1,9 +1,14 @@
-First note
-This note has file lines
-here's another
-and another
-here's a longer line with more words and such
-and the last line
+yabai
+focus window - alt - (h,j,k,l)
+swap window - shift + alt - (h,j,k,l)
+move window - shift + cmd - (h,j,k,l)
+create desktop + follow - shift + cmd(move)/alt(no mode) - n
+destroy desktop - cmd + alt - w
+fast focus desktop - cmd + alt - (z/x/c)/n
+send window to desktop and follow focus - shift + cmd - (z/x/c)/n
+move window - shift + ctrl - w/a/s/d
+increase window size - shift + alt - w/a/s/d
+decrease window size - shift + cmd - w/a/s/d
 ---
 Second note
 This note only has two lines
