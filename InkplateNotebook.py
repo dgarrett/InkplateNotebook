@@ -10,11 +10,16 @@ from time import sleep
 from secrets import ssid, password
 
 """
+44 column max, 15 lines tall
+
 setup:
 ./micropython/pyboard.py --device /dev/cu.usbserial-* -f cp ./micropython/sdcard.py ./micropython/inkplate6.py ./micropython/image.py ./micropython/gfx.py ./micropython/gfx_standard_font_01.py ./micropython/shapes.py ./micropython-lib/python-stdlib/textwrap/textwrap.py secrets.py :
 
 run:
 ./micropython/pyboard.py --device /dev/cu.usbserial-* InkplateNotebook.py --follow
+
+deploy:
+./micropython/pyboard.py --device /dev/cu.usbserial-* -f cp InkplateNotebook.py :main.py
 """
 
 SIMULATE_NET = False
@@ -148,7 +153,8 @@ if __name__ == '__main__':
             update = True
 
         if update:
-            print_lines(display, notes[current_note] + '\nPage: {}/{}'.format(current_note + 1, len(notes)))
+            print_lines(display, notes[current_note] + '\n\nPage: {}/{} (Bat: {}V)'.format(
+                current_note + 1, len(notes), display.readBattery()))
             display.partialUpdate()
             update = False
 
