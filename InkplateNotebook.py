@@ -11,10 +11,10 @@ from secrets import ssid, password
 
 """
 setup:
-./micropython/pyboard.py --device /dev/cu.usbserial-1450 -f cp ./micropython/sdcard.py ./micropython/inkplate6.py ./micropython/image.py ./micropython/gfx.py ./micropython/gfx_standard_font_01.py ./micropython/shapes.py ./micropython-lib/python-stdlib/textwrap/textwrap.py secrets.py :
+./micropython/pyboard.py --device /dev/cu.usbserial-* -f cp ./micropython/sdcard.py ./micropython/inkplate6.py ./micropython/image.py ./micropython/gfx.py ./micropython/gfx_standard_font_01.py ./micropython/shapes.py ./micropython-lib/python-stdlib/textwrap/textwrap.py secrets.py :
 
 run:
-./micropython/pyboard.py --device /dev/cu.usbserial-1450 InkplateNotebook.py --follow
+./micropython/pyboard.py --device /dev/cu.usbserial-* InkplateNotebook.py --follow
 """
 
 SIMULATE_NET = False
@@ -34,6 +34,15 @@ def do_connect():
             pass
     print("network config:", sta_if.ifconfig())
 
+
+def do_disconnect():
+    if SIMULATE_NET:
+        return
+
+    sta_if = network.WLAN(network.STA_IF)
+    if sta_if.isconnected():
+        print("disconnecting from network...")
+        sta_if.active(False)
 
 # More info here: https://docs.micropython.org/en/latest/esp8266/tutorial/network_tcp.html
 def http_get(url) -> str:
@@ -69,8 +78,12 @@ def sleep_until_touch():
     print('Going to sleep now')
     machine.deepsleep()
 
-def print_lines(display: Inkplate, text: str, size = 3):
+def print_lines(display: Inkplate, text: str, size = 3, full_clear=True):
     display.clearDisplay()
+    if full_clear:
+        display.display()
+    else:
+        display.partialUpdate()
     display.setTextSize(size)
     cnt = 0
     split = text.split('\n')
@@ -92,34 +105,42 @@ def split_notes(raw: str) -> list(str):
 def handle_interrupt(pin):
     print('interrupt')
 
+def connect_and_update_notes():
+    do_connect()
+    response = http_get(notes_url)
+    do_disconnect()
+
+    return response.split('\n---\n')
+
 if __name__ == '__main__':
     print('wake reason: ', machine.wake_reason())
 
     display = Inkplate(Inkplate.INKPLATE_1BIT)
     display.begin()
 
+    battery = display.readBattery()
+    print('Battery: ', battery)
+    print_lines(display, 'Battery: {}'.format(battery))
+
     # display.TOUCH1.irq(trigger=Pin.IRQ_RISING, handler=handle_interrupt)
 
-    # Calling functions defined above
-    do_connect()
-    response = http_get(notes_url)
-
-    notes = response.split('\n---\n')
+    notes = connect_and_update_notes()
     current_note = 0
-    print_lines(display, notes[current_note])
+    update = True
 
-    # Display image from buffer
-    display.display()
-
-    prev1 = False
-    prev3 = False
     (prev_touch1, prev_touch2, prev_touch3) = (False, False, False)
     while True:
-        update = False
         (curr_touch1, curr_touch2, curr_touch3) = (display.TOUCH1(), display.TOUCH2(), display.TOUCH3())
         if curr_touch1 and not prev_touch1:
             print('TOUCH1')
             current_note = current_note - 1 if current_note > 0 else current_note
+            update = True
+        if curr_touch2 and not prev_touch2:
+            print('TOUCH2')
+            print_lines(display, '...', full_clear=False)
+            display.partialUpdate()
+            notes = connect_and_update_notes()
+            current_note = 0
             update = True
         elif curr_touch3 and not prev_touch3:
             print('TOUCH3')
@@ -127,8 +148,9 @@ if __name__ == '__main__':
             update = True
 
         if update:
-            print_lines(display, notes[current_note])
+            print_lines(display, notes[current_note] + '\nPage: {}/{}'.format(current_note + 1, len(notes)))
             display.partialUpdate()
+            update = False
 
         (prev_touch1, prev_touch2, prev_touch3) = (curr_touch1, curr_touch2, curr_touch3)
 
