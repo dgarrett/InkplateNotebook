@@ -10,14 +10,10 @@ window to desktop follow - shift + cmd - (z/x/c)/n
 move window - shift + ctrl - w/a/s/d
 window size++ - shift + alt - w/a/s/d
 window size-- - shift + cmd - w/a/s/d
-1
-2
-3
-4
-5
-5
-6
-7
+
+
+
+
 ---
 Second note
 This note only has two lines
