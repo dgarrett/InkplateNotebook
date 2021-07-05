@@ -2,13 +2,22 @@ yabai
 focus window - alt - (h,j,k,l)
 swap window - shift + alt - (h,j,k,l)
 move window - shift + cmd - (h,j,k,l)
-+ desktop follow - shift + cmd(move)/alt(no mode) - n
++ desktop follow - shift + alt - n
++ desktop follow/move - shift + cmd - n
 - desktop - cmd + alt - w
 focus desktop - cmd + alt - (z/x/c)/n
 window to desktop follow - shift + cmd - (z/x/c)/n
 move window - shift + ctrl - w/a/s/d
 window size++ - shift + alt - w/a/s/d
 window size-- - shift + cmd - w/a/s/d
+1
+2
+3
+4
+5
+5
+6
+7
 ---
 Second note
 This note only has two lines
